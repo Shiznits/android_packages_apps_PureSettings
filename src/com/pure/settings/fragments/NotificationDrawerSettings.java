@@ -49,11 +49,15 @@ public class NotificationDrawerSettings extends SettingsPreferenceFragment imple
     private static final String CUSTOM_HEADER_IMAGE_SHADOW = "status_bar_custom_header_shadow";
     private static final String CUSTOM_HEADER_PROVIDER = "custom_header_provider";
     private static final String CUSTOM_HEADER_BROWSE = "custom_header_browse";
+    private static final String PREF_ROWS_PORTRAIT = "qs_rows_portrait";
+    private static final String PREF_ROWS_LANDSCAPE = "qs_rows_landscape";
 
     private ListPreference mQuickPulldown;
     ListPreference mSmartPulldown;
     private ListPreference mDaylightHeaderPack;
     private ListPreference mHeaderProvider;
+    private CustomSeekBarPreference mRowsPortrait;
+    private CustomSeekBarPreference mRowsLandscape;
     private CustomSeekBarPreference mHeaderShadow;
     private PreferenceScreen mHeaderBrowse;
     private String mDaylightHeaderProvider;
@@ -78,6 +82,19 @@ public class NotificationDrawerSettings extends SettingsPreferenceFragment imple
                 Settings.System.QS_SMART_PULLDOWN, 0);
         mSmartPulldown.setValue(String.valueOf(smartPulldown));
         updateSmartPulldownSummary(smartPulldown);
+
+        mRowsPortrait = (CustomSeekBarPreference) findPreference(PREF_ROWS_PORTRAIT);
+        int rowsPortrait = Settings.System.getInt(resolver,
+                Settings.System.QS_ROWS_PORTRAIT, 3);
+        mRowsPortrait.setValue(rowsPortrait / 1);
+        mRowsPortrait.setOnPreferenceChangeListener(this);
+
+        int defaultValue = getResources().getInteger(com.android.internal.R.integer.config_qs_num_rows_landscape_default);
+        mRowsLandscape = (CustomSeekBarPreference) findPreference(PREF_ROWS_LANDSCAPE);
+        int rowsLandscape = Settings.System.getInt(resolver,
+                Settings.System.QS_ROWS_LANDSCAPE, defaultValue);
+        mRowsLandscape.setValue(rowsLandscape / 1);
+        mRowsLandscape.setOnPreferenceChangeListener(this);
 
         String settingHeaderPackage = Settings.System.getString(resolver,
                 Settings.System.STATUS_BAR_DAYLIGHT_HEADER_PACK);
@@ -145,7 +162,15 @@ public class NotificationDrawerSettings extends SettingsPreferenceFragment imple
             Settings.System.putInt(resolver, Settings.System.QS_SMART_PULLDOWN, smartPulldown);
             updateSmartPulldownSummary(smartPulldown);
             return true;
-} else if (preference == mDaylightHeaderPack) {
+        } else if (preference == mRowsPortrait) {
+            int rowsPortrait = (Integer) newValue;
+            Settings.System.putInt(resolver, Settings.System.QS_ROWS_PORTRAIT, rowsPortrait * 1);
+            return true;
+        } else if (preference == mRowsLandscape) {
+            int rowsLandscape = (Integer) newValue;
+            Settings.System.putInt(resolver, Settings.System.QS_ROWS_LANDSCAPE, rowsLandscape * 1);
+            return true;
+       } else if (preference == mDaylightHeaderPack) {
             String value = (String) newValue;
             Settings.System.putString(resolver,
                     Settings.System.STATUS_BAR_DAYLIGHT_HEADER_PACK, value);
