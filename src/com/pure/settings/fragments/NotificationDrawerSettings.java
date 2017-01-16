@@ -27,12 +27,15 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
+import android.support.v7.preference.PreferenceCategory;
 import android.support.v7.preference.PreferenceScreen;
 
 import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.widget.LockPatternUtils;
 
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
+import com.pure.settings.preferences.SecureSettingSwitchPreference;
 
 import com.pure.settings.preferences.CustomSeekBarPreference;
 
@@ -42,8 +45,10 @@ import java.util.ArrayList;
 public class NotificationDrawerSettings extends SettingsPreferenceFragment implements
         Preference.OnPreferenceChangeListener {
 
+    private static final String QS_CAT = "qs_panel";
     private static final String QUICK_PULLDOWN = "quick_pulldown";
     private static final String PREF_SMART_PULLDOWN = "smart_pulldown";
+    private static final String PREF_QSLOCK = "lockscreen_qs_disabled";
     private static final String DAYLIGHT_HEADER_PACK = "daylight_header_pack";
     private static final String DEFAULT_HEADER_PACKAGE = "com.android.systemui";
     private static final String CUSTOM_HEADER_IMAGE_SHADOW = "status_bar_custom_header_shadow";
@@ -54,6 +59,7 @@ public class NotificationDrawerSettings extends SettingsPreferenceFragment imple
 
     private ListPreference mQuickPulldown;
     ListPreference mSmartPulldown;
+    private SecureSettingSwitchPreference mQsLock;
     private ListPreference mDaylightHeaderPack;
     private ListPreference mHeaderProvider;
     private CustomSeekBarPreference mRowsPortrait;
@@ -62,12 +68,17 @@ public class NotificationDrawerSettings extends SettingsPreferenceFragment imple
     private PreferenceScreen mHeaderBrowse;
     private String mDaylightHeaderProvider;
 
+    private static final int MY_USER_ID = UserHandle.myUserId();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.notification_drawer_settings);
         PreferenceScreen prefScreen = getPreferenceScreen();
         ContentResolver resolver = getActivity().getContentResolver();
+
+        final LockPatternUtils lockPatternUtils = new LockPatternUtils(getActivity());
+        PreferenceCategory qscat = (PreferenceCategory) findPreference(QS_CAT);
 
         mQuickPulldown = (ListPreference) findPreference(QUICK_PULLDOWN);
         mQuickPulldown.setOnPreferenceChangeListener(this);
@@ -82,6 +93,11 @@ public class NotificationDrawerSettings extends SettingsPreferenceFragment imple
                 Settings.System.QS_SMART_PULLDOWN, 0);
         mSmartPulldown.setValue(String.valueOf(smartPulldown));
         updateSmartPulldownSummary(smartPulldown);
+
+        mQsLock = (SecureSettingSwitchPreference) prefScreen.findPreference(PREF_QSLOCK);
+        if (!lockPatternUtils.isSecure(MY_USER_ID)) {
+            qscat.removePreference(mQsLock);
+        }
 
         mRowsPortrait = (CustomSeekBarPreference) findPreference(PREF_ROWS_PORTRAIT);
         int rowsPortrait = Settings.System.getInt(resolver,
