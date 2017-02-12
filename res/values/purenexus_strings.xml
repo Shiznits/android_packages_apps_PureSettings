@@ -72,7 +72,9 @@
     <string name="notification_light_no_apps_summary">To add per app control, activate \'%1$s\' and press \'\u002b\' on the menu bar</string>
     <string name="allow_lights_title">Lights in do not disturb mode</string>
     <string name="notification_light_screen_on">Lights with screen on</string>
-
+    <!-- QS easy toggles -->
+    <string name="qs_easy_toggle_title">Advanced Quick Setting easy toggle</string>
+    <string name="qs_easy_toggle_summary">one tap action to toggle bluetooth, data, or wifi</string>
     <!-- General strings -->
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
